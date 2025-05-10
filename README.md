@@ -1,3 +1,7 @@
+# Technologies
+
+##  FastAPI, Python, MongoDB
+
 # API Hosted on
 [https://sympliqueapi-production.up.railway.app](https://sympliqueapi-production.up.railway.app)
 
