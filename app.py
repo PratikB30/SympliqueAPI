@@ -46,7 +46,7 @@ async def create_reminder(
             "userid": reminder.userid,
             "message": reminder.message,
             "reminder type": reminder.reminder_type,
-            "time": reminder_date_time
+            "time": reminder_date_time.isoformat()
         }
         
         # Uploads document to database (mongodb)
