@@ -1,4 +1,4 @@
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, APIRouter, BackgroundTasks  
 from motor.motor_asyncio import AsyncIOMotorClient
 import os
 from datetime import datetime
@@ -6,8 +6,8 @@ from class_reminder import Reminder
 
 app = FastAPI()
 
-# from dotenv import load_dotenv
-# load_dotenv()
+from dotenv import load_dotenv
+load_dotenv()
 
 # .env has my personal account URI for database connection
 MONGODB_URI = os.getenv('MONGODB_URI')
@@ -16,20 +16,22 @@ mongo_client = AsyncIOMotorClient(MONGODB_URI)
 db = mongo_client['Reminder']
 col = db["Reminder_Collection"]  
 
+
 # It is just to check if the API is working 
 @app.api_route('/')
 def index():
     return {"Test Route"}
+
 
 # Main route
 # run these 3 lines in powershell altogether to enter a reminder ->
 # curl -X POST "http://127.0.0.1:8000/reminders/" `
 #     -H "Content-Type: application/json" ` 
 #     -d '{"userid": "abc123", "date": "2025-05-10", "time": "14:30:00", "message": "Doctor appointment", "reminder_type": "email"}'
-
 @app.post('/reminders/')
 async def create_reminder(
-    reminder: Reminder
+    reminder: Reminder,
+    background_tasks: BackgroundTasks
 ):
     try:
         reminder_date_time = datetime.combine(reminder.date, reminder.time)
@@ -45,19 +47,31 @@ async def create_reminder(
             "userid": reminder.userid,
             "message": reminder.message,
             "reminder type": reminder.reminder_type,
-            "time": reminder_date_time.isoformat()
+            "time": reminder_date_time
         }
         
         # Uploads document to database (mongodb)
         result = await col.insert_one(reminder_data)
+        
         return {"id": str(result.inserted_id), "message": f"Created reminder - {reminder.message} at {reminder_date_time} for {reminder.userid}"}
     
     except Exception as e:
         print(e)
         raise HTTPException(status_code=500, detail="Server Error")
-      
     
+
+# function to remove a user's records more than 5 days old
+async def rm_old_reminders(userid: str):
+    diff = datetime.utcnow() - timedelta(days=5)
     
+    delete_result = await col.delete_many({
+        "userid": userid,
+        "time": {"$lt": diff}
+    })
+    
+    print(f"Removed {delete_result.deleted_count} old reminders for user {userid}")
+    
+
 # Get a user's reminders stored in the database  
 # To get records ->     
 @app.get('/get_reminders/users/{userid}')
@@ -88,3 +102,18 @@ async def all_reminders():
     except Exception as e:
         print(e)
         raise HTTPException(status_code=500, detail="Server Error")
+    
+    
+# For users to delete all their reminders
+@app.get('/remove_reminders/users/{userid}')
+async def remove_reminder(
+    userid: str
+):
+    try:
+        reminders = await col.delete_many({"userid": userid})
+        return {"Message": "No reminders left"}
+    
+    except Exception as e:
+        print(e)
+        raise HTTPException(status_code=500, detail="Server Error")
+        
