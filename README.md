@@ -101,5 +101,6 @@ http://127.0.0.1:8000/get_reminders/all/
 http://127.0.0.1:8000/remove_reminders/users/{userid}
 ```
 For Example
-
+```bash
 http://127.0.0.1:8000/remove_reminders/users/abc123
+```
