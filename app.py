@@ -37,10 +37,11 @@ async def create_reminder(
         
         # to check if entered date and time is greater than current time
         if reminder_date_time < datetime.now():
-            raise HTTPException(
-                status_code=400,
-                detail="Reminder must be greater than the current date and time"
-            )
+            # raise HTTPException(
+            #     status_code=400,
+            #     detail="Reminder must be greater than the current date and time"
+            # )
+            return {"Error": "Reminder must be greater than the current date and time"}
         
         reminder_data = {
             "userid": reminder.userid,
