@@ -6,8 +6,8 @@ from class_reminder import Reminder
 
 app = FastAPI()
 
-from dotenv import load_dotenv
-load_dotenv()
+# from dotenv import load_dotenv
+# load_dotenv()
 
 # .env has my personal account URI for database connection
 MONGODB_URI = os.getenv('MONGODB_URI')
