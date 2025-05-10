@@ -11,9 +11,9 @@ RUN pip install --upgrade pip && pip install --no-cache-dir -r requirements.txt
 
 COPY . /app
 
-RUN chmod +x /app/gunicorn.sh
 
 EXPOSE 8000
 ENV PORT=8000
 
-CMD ["gunicorn", "—bind", "0.0.0.0:8000", "uvicorn.workers.UvicornWorker", "—-reload", "-k", "app:app" ]
+CMD ["gunicorn", "--bind", "0.0.0.0:8000", "app:app", "-k", "uvicorn.workers.UvicornWorker"]
+

@@ -1,4 +1,4 @@
-from fastapi import FastAPI, HTTPException, APIRouter, BackgroundTasks  
+from fastapi import FastAPI, HTTPException 
 from motor.motor_asyncio import AsyncIOMotorClient
 import os
 from datetime import datetime
@@ -18,7 +18,7 @@ col = db["Reminder_Collection"]
 
 
 # It is just to check if the API is working 
-@app.api_route('/')
+@app.get('/')
 def index():
     return {"Test Route"}
 
@@ -30,8 +30,7 @@ def index():
 #     -d '{"userid": "abc123", "date": "2025-05-10", "time": "14:30:00", "message": "Doctor appointment", "reminder_type": "email"}'
 @app.post('/reminders/')
 async def create_reminder(
-    reminder: Reminder,
-    background_tasks: BackgroundTasks
+    reminder: Reminder
 ):
     try:
         reminder_date_time = datetime.combine(reminder.date, reminder.time)
@@ -58,18 +57,6 @@ async def create_reminder(
     except Exception as e:
         print(e)
         raise HTTPException(status_code=500, detail="Server Error")
-    
-
-# function to remove a user's records more than 5 days old
-async def rm_old_reminders(userid: str):
-    diff = datetime.utcnow() - timedelta(days=5)
-    
-    delete_result = await col.delete_many({
-        "userid": userid,
-        "time": {"$lt": diff}
-    })
-    
-    print(f"Removed {delete_result.deleted_count} old reminders for user {userid}")
     
 
 # Get a user's reminders stored in the database  
