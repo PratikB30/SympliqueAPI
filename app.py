@@ -67,7 +67,7 @@ async def get_all_reminder_for_user(
     userid: str
 ):
     try:
-        reminders = await col.find({"userid": userid}, {"_id": 0}).to_list(length=100)
+        reminders = await col.find({"userid": userid}, {"userid": 0, "_id": 0}).to_list(length=100)
         if not reminders:
             print(f"No reminder for {userid}")
         return reminders
